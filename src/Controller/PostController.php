@@ -16,10 +16,15 @@ class PostController extends AbstractController
     public function create(Request $request, PostService $postService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
+    
         try {
-            $postData = $postService->createPost($data);
-            return $this->json($postData, 201);
+            $post = $postService->createPost($data);
+            return $this->json([
+                'id' => $post->getId(),
+                'title' => $post->getTitle(),
+                'content' => $post->getContent(),
+                'author_id' => $post->getAuthor()->getId(),
+            ], 201);
         } catch (\Throwable $e) {
             return $this->json(['error' => $e->getMessage()], $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500);
         }

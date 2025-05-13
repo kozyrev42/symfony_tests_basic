@@ -17,7 +17,7 @@ class PostService
         private PostRepository $postRepository,
     ){}
 
-    public function createPost(array $data): array
+    public function createPost(array $data): Post
     {
         if (!isset($data['title'], $data['content'], $data['author_id'])) {
             throw new BadRequestHttpException('Missing required fields');
@@ -36,12 +36,7 @@ class PostService
         $this->em->persist($post);
         $this->em->flush();
 
-        return [
-            'id' => $post->getId(),
-            'title' => $post->getTitle(),
-            'content' => $post->getContent(),
-            'author_id' => $author->getId(),
-        ];
+        return $post;
     }
 
     public function getPostWithComments(int $postId): array
