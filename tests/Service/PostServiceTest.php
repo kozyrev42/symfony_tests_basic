@@ -4,7 +4,7 @@ namespace App\Tests\Service;
 
 use App\Entity\Post;
 use App\Entity\User;
-use App\Repository\PostRepository;
+use App\Repository\PostRepositoryInterface;
 use App\Repository\UserRepository;
 use App\Service\PostService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,13 +35,14 @@ class PostServiceTest extends TestCase
             ->with($authorId)
             ->willReturn($author);
 
-        // 🧪 Мок EntityManager — ожидаем вызов persist() и flush()
+        // 🧪 Мок EntityManager — без ожиданий (persist/flush вызываются внутри репозитория)
         $em = $this->createMock(EntityManagerInterface::class);
-        $em->expects($this->once())->method('persist')->with($this->isInstanceOf(Post::class));
-        $em->expects($this->once())->method('flush');
 
-        // 🧪 Мок PostRepository — не используется в этом тесте, но нужен для конструктора
-        $postRepository = $this->createMock(PostRepository::class);
+        // 🧪 Мок PostRepositoryInterface — ожидаем вызов save()
+        $postRepository = $this->createMock(PostRepositoryInterface::class);
+        $postRepository->expects($this->once())
+            ->method('save')
+            ->with($this->isInstanceOf(Post::class));
 
         // ⚙️ Создание сервиса
         $service = new PostService($em, $userRepository, $postRepository);
@@ -73,7 +74,7 @@ class PostServiceTest extends TestCase
         // 🧪 Моки
         $em = $this->createMock(EntityManagerInterface::class);
         $userRepository = $this->createMock(UserRepository::class);
-        $postRepository = $this->createMock(PostRepository::class);
+        $postRepository = $this->createMock(PostRepositoryInterface::class);
 
         // ⚙️ Сервис
         $service = new PostService($em, $userRepository, $postRepository);
@@ -107,7 +108,7 @@ class PostServiceTest extends TestCase
             ->willReturn(null);
 
         $em = $this->createMock(EntityManagerInterface::class);
-        $postRepository = $this->createMock(PostRepository::class);
+        $postRepository = $this->createMock(PostRepositoryInterface::class);
 
         // ⚙️ Сервис
         $service = new PostService($em, $userRepository, $postRepository);

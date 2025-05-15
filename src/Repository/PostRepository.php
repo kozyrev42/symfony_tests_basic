@@ -19,11 +19,24 @@ use Doctrine\Persistence\ManagerRegistry;
  * — Инкапсулировать запросы: ты не пишешь SQL-запросы прямо в контроллере или сервисе.
  * — Централизовать логику получения данных, особенно если это кастомные или сложные запросы.
  */
-class PostRepository extends ServiceEntityRepository
+class PostRepository extends ServiceEntityRepository implements PostRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Post::class);
+    }
+
+    public function save(Post $post): void
+    {
+        $this->getEntityManager()->persist($post);
+        $this->getEntityManager()->flush();
+    }
+    
+    public function findPostById(int $id): ?Post
+    {
+        /** @var Post|null $post */
+        $post = $this->find($id);
+        return $post;
     }
 
     /**

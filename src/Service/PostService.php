@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Repository\PostRepository;
+use App\Repository\PostRepositoryInterface;
 use App\Entity\Post;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,7 +14,7 @@ class PostService
     public function __construct(
         private EntityManagerInterface $em,
         private UserRepository $userRepository,
-        private PostRepository $postRepository,
+        private PostRepositoryInterface $postRepository,
     ){}
 
     public function createPost(array $data): Post
@@ -33,15 +33,14 @@ class PostService
         $post->setContent($data['content']);
         $post->setAuthor($author);
 
-        $this->em->persist($post);
-        $this->em->flush();
+        $this->postRepository->save($post);
 
         return $post;
     }
 
     public function getPostWithComments(int $postId): array
     {
-        $post = $this->postRepository->find($postId);
+        $post = $this->postRepository->findPostById($postId);
 
         if (!$post) {
             throw new NotFoundHttpException('Пост не найден');
